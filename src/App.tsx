@@ -1,0 +1,756 @@
+import { useEffect, useState } from "react";
+import HeaderComponent from "./components/HeaderComponent";
+import GridComponent from "./components/GridComponent";
+import bfs from "./algorithms/bfs";
+import aStar from "./algorithms/astar";
+import hamiltonian from "./algorithms/hamiltonian";
+
+import { MdAutoAwesome } from "react-icons/md";
+import {
+  FaRedo,
+  FaPause,
+  FaPlay,
+  FaArrowLeft,
+  FaArrowRight,
+  FaArrowUp,
+  FaArrowDown,
+} from "react-icons/fa";
+import bestFirstSearch from "./algorithms/bestFirstSearch";
+
+function App() {
+  // Grid and other related states
+  const [grid, setGrid] = useState<string[][]>([]);
+  const [gridSize, setGridSize] = useState<number>(30);
+  const [showGrid, setShowGrid] = useState<boolean>(true);
+  const [order, setOrder] = useState<number[][]>([]);
+  const [showComputation, setShowComputation] = useState<boolean>(true);
+  const [score, setScore] = useState<number>(0);
+  const [bestScore, setBestScore] = useState<number>(
+    window.localStorage.getItem("bestScore")
+      ? Number(window.localStorage.getItem("bestScore"))
+      : 0
+  );
+  const [bestAutoPilotScore, setBestAutoPilotScore] = useState<number>(
+    window.localStorage.getItem("bestAutoPilotScore")
+      ? Number(window.localStorage.getItem("bestAutoPilotScore"))
+      : 0
+  );
+
+  // Snake and item states
+  const [snake, setSnake] = useState<SnakeBlock[]>([
+    { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) - 1 },
+    { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) },
+    { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) + 1 },
+  ]);
+  const [tail, setTail] = useState<SnakeBlock>();
+  const [food, setFood] = useState<FoodBlock>({
+    posX: Math.floor(Math.random() * gridSize - 1),
+    posY: Math.floor(Math.random() * gridSize - 1),
+  });
+  const [path, setPath] = useState<SnakeBlock[]>([]);
+  const [visited, setVisited] = useState<SnakeBlock[]>([]);
+
+  // Game flow and related states
+  const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
+  const [isSnakeAlive, setIsSnakeAlive] = useState<boolean>(true);
+  const [direction, setDirection] = useState<string>("left");
+  const [speed, setSpeed] = useState<number>(50);
+  const [difficulty, setDifficulty] = useState<string>("Medium");
+  const [autoPilot, setautoPilot] = useState<boolean>(false);
+  const [autoPilotUsed, setAutoPilotUsed] = useState<boolean>(false);
+  const [algorithm, setAlgorithm] = useState<string>("Breadth First Search");
+  const [description, setDescription] = useState<string>("");
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
+
+  const updateDifficulty = (speed: number) => {
+    if (speed == 0) {
+      setDifficulty("Very Easy");
+    } else if (speed == 25) {
+      setDifficulty("Easy");
+    } else if (speed == 50) {
+      setDifficulty("Medium");
+    } else if (speed == 75) {
+      setDifficulty("Hard");
+    } else if (speed == 100) {
+      setDifficulty("Inhuman");
+    }
+
+    setSpeed(speed);
+  };
+
+  // Update scores to local storage
+  const updateScores = () => {
+    const bestSc = window.localStorage.getItem("bestScore");
+    const bestAutoPilotSc = window.localStorage.getItem("bestAutoPilotScore");
+
+    if (bestSc == null)
+      if (!autoPilotUsed)
+        window.localStorage.setItem("bestScore", score.toString());
+      else window.localStorage.setItem("bestAutoPilotScore", score.toString());
+    else {
+      if (!autoPilotUsed && Number(bestSc) < score) {
+        window.localStorage.setItem("bestScore", score.toString());
+      } else if (Number(bestAutoPilotSc) < score) {
+        window.localStorage.setItem("bestAutoPilotScore", score.toString());
+      }
+    }
+  };
+
+  const moveSnake = () => {
+    const movement: SnakeMovement = { x: 0, y: 0 };
+
+    setDirection((prevDirection) => {
+      switch (prevDirection) {
+        case "up":
+          movement.x = -1;
+          break;
+        case "down":
+          movement.x = 1;
+          break;
+        case "left":
+          movement.y = -1;
+          break;
+        case "right":
+          movement.y = 1;
+          break;
+        default:
+          break;
+      }
+
+      return prevDirection;
+    });
+
+    setSnake((prevSnake) => {
+      const newSnake = [...prevSnake];
+
+      const head = newSnake[0]; // Snake head block position is always == 0
+
+      newSnake.unshift({
+        posX: head.posX + movement.x,
+        posY: head.posY + movement.y,
+      });
+
+      // Check if the snake has gone out of bounds
+      if (
+        newSnake[0].posX < 0 ||
+        newSnake[0].posY < 0 ||
+        newSnake[0].posX > gridSize - 1 ||
+        newSnake[0].posY > gridSize - 1
+      ) {
+        // console.log("Out of bounds");
+        // console.log(snake[0]);
+        setIsGameRunning(false); // Stop the game immediately
+        setIsSnakeAlive(false); // Set snake as dead
+        updateScores();
+        return newSnake.slice(1); // Remove the first out-of-bound element
+      }
+
+      // Check if the snake has bitten itself
+      if (grid[newSnake[0].posX][newSnake[0].posY] === "snake") {
+        // console.log("Snake bites itself");
+        // console.log(snake[0]);
+        setIsGameRunning(false); // Stop the game immediately
+        setIsSnakeAlive(false); // Set snake as dead
+        updateScores();
+        return newSnake.slice(1); // Remove the first out-of-bound element
+      }
+
+      // Check if the snake has eaten food
+      if (grid[newSnake[0].posX][newSnake[0].posY] === "food") {
+        setScore((prevScore) => {
+          const newScore = prevScore + 1;
+
+          if (!autoPilotUsed && newScore > bestScore) {
+            setBestScore(newScore);
+          }
+
+          if (autoPilot && newScore > bestAutoPilotScore) {
+            setBestAutoPilotScore(newScore);
+          }
+
+          return newScore;
+        });
+        // Respawn food to a random location
+        setFood(() => {
+          let newPos = {
+            posX: Math.floor(Math.random() * (gridSize - 1)),
+            posY: Math.floor(Math.random() * (gridSize - 1)),
+          };
+
+          // Check if this pos is a unvisited node
+          while (grid[newPos.posX][newPos.posY] !== "unvisited") {
+            newPos = {
+              posX: Math.floor(Math.random() * (gridSize - 1)),
+              posY: Math.floor(Math.random() * (gridSize - 1)),
+            };
+          }
+
+          return newPos;
+        });
+
+        newSnake.push(newSnake[newSnake.length - 1]);
+      }
+
+      // Set tail to be removed from the grid
+      setTail(newSnake.pop()!);
+
+      return newSnake;
+    });
+  };
+
+  const getDirection = (
+    position: SnakeBlock,
+    nextPosition: SnakeBlock
+  ): string => {
+    if (
+      position.posX > nextPosition.posX &&
+      position.posY === nextPosition.posY
+    ) {
+      return "up";
+    } else if (
+      position.posX < nextPosition.posX &&
+      position.posY === nextPosition.posY
+    ) {
+      return "down";
+    } else if (
+      position.posX === nextPosition.posX &&
+      position.posY > nextPosition.posY
+    ) {
+      return "left";
+    } else return "right";
+  };
+
+  useEffect(() => {
+    // Set snake according to the new gridSize
+    setSnake(() => {
+      return [
+        { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) - 1 },
+        { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) },
+        { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) + 1 },
+      ];
+    });
+
+    // Respawn food according to the new gridSize
+    if (!isInitialLoad) {
+      setFood(() => {
+        return {
+          posX: Math.floor(Math.random() * gridSize - 1),
+          posY: Math.floor(Math.random() * gridSize - 1),
+        };
+      });
+    }
+
+    setIsInitialLoad(false);
+
+    // Compute hamiltonian cycle
+    const initialOrder: number[][] = [];
+    for (let i = 0; i < gridSize; ++i) {
+      const row: number[] = [];
+      for (let j = 0; j < gridSize; ++j) {
+        row.push(0);
+      }
+      initialOrder.push(row);
+    }
+
+    const initialPos: SnakeBlock = { posX: 0, posY: 0 };
+
+    const { pathFound, pathOrder } = hamiltonian(
+      initialPos,
+      initialPos,
+      gridSize,
+      initialOrder,
+      1
+    );
+
+    if (pathFound) {
+      setOrder(pathOrder);
+    }
+  }, [gridSize]);
+
+  useEffect(() => {
+    switch (algorithm) {
+      case "Breadth First Search":
+        setDescription(
+          "At the start, used Breadth-First Search (BFS) for pathfinding in the snake game. It mapped out paths, but computation grew hefty on larger grids. Noticed performance issues due to exhaustive exploration. Identified the need for efficiency, leading to advancements in algorithms to cut down unnecessary computations and enhance speed. 🕹️🐍✨"
+        );
+        break;
+      case "Best First Search":
+        setDescription(
+          "Initially, relied on Breadth-First Search (BFS) for snake pathfinding. While effective, computational demands escalated on larger grids, impacting performance. Recognizing the need for efficiency, transitioned to Best-First Search—a greedy algorithm, faster but not always optimal. Balancing efficiency and optimality became paramount for a refined autopilot strategy. 🕹️🔍🚀"
+        );
+        break;
+      case "A* Search":
+        setDescription(
+          "Transitioned to A* for snake pathfinding—an optimal blend of efficiency and perfection, ensuring the shortest path. Despite this triumph, an obsession blossomed for crafting the perfect snake game. Over time, this fixation deepened—an unrelenting pursuit to create an invincible snake, achieving the perfect score. The quest for an everlasting, flawless game experience consumed me entirely. 🐍✨🏆🌟"
+        );
+        break;
+      case "Hamiltonian Cycle":
+        setDescription(
+          "Later, I stumbled upon the Hamiltonian Cycle which with just one-time O(4^n) computation can actually result in a perfect game. However, its efficiency is marred by slowness in visualization. Once calculated, it lazily traverses the grid, presenting an efficient path to the elusive perfect score. A game-changer, albeit with visual speed challenges, in the quest for snake perfection. 🐍⚙️🏆🏁"
+        );
+        break;
+    }
+  }, [algorithm]);
+
+  useEffect(() => {
+    if (isGameRunning) {
+      const intervalId = setInterval(() => {
+        // Get current snake state for every update
+        setSnake((prevSnake) => {
+          // Check if autoPilot is enabled
+          if (autoPilot) {
+            setAutoPilotUsed(true); // Set that user has used autopilot, update autopilot score only
+
+            // Using prevFood state to get the current prevFood position instantly
+            setFood((prevFood) => {
+              // If the code is BFS/A*
+              if (
+                algorithm === "Breadth First Search" ||
+                algorithm === "Best First Search" ||
+                algorithm === "A* Search"
+              ) {
+                // If algorithm is specifically BFS
+                let path: SnakeBlock[] = [],
+                  visited: SnakeBlock[] = [];
+                if (algorithm === "Breadth First Search") {
+                  const res = bfs(prevSnake[0], grid, gridSize, prevFood);
+
+                  path = res.path;
+                  visited = res.visited;
+                } else if (algorithm === "Best First Search") {
+                  const res = bestFirstSearch(
+                    prevSnake[0],
+                    grid,
+                    gridSize,
+                    prevFood
+                  );
+
+                  path = res.path;
+                  visited = res.visited;
+                } else {
+                  const res = aStar(prevSnake[0], grid, gridSize, prevFood);
+
+                  path = res.path;
+                  visited = res.visited;
+                }
+
+                if (path.length > 0) {
+                  const direction = getDirection(prevSnake[0], path[0]);
+                  setDirection(direction);
+                } else {
+                  let maxVisitedNodesByDirection: {
+                    visited: SnakeBlock[];
+                    direction: string;
+                  } = {
+                    visited: [],
+                    direction: "",
+                  };
+
+                  if (
+                    prevSnake[0].posX - 1 >= 0 &&
+                    grid[prevSnake[0].posX - 1][prevSnake[0].posY] !==
+                      "snake" &&
+                    direction !== "down"
+                  ) {
+                    const { visited: visitedNodes } = bfs(
+                      { posX: prevSnake[0].posX - 1, posY: prevSnake[0].posY },
+                      grid,
+                      gridSize,
+                      food
+                    );
+
+                    if (
+                      visitedNodes.length >
+                      maxVisitedNodesByDirection.visited.length
+                    ) {
+                      maxVisitedNodesByDirection = {
+                        visited: visitedNodes,
+                        direction: "up",
+                      };
+                    }
+                  } else if (
+                    prevSnake[0].posX + 1 < gridSize &&
+                    grid[prevSnake[0].posX + 1][prevSnake[0].posY] !==
+                      "snake" &&
+                    direction !== "up"
+                  ) {
+                    const { visited: visitedNodes } = bfs(
+                      { posX: prevSnake[0].posX + 1, posY: prevSnake[0].posY },
+                      grid,
+                      gridSize,
+                      food
+                    );
+
+                    if (
+                      visitedNodes.length >
+                      maxVisitedNodesByDirection.visited.length
+                    ) {
+                      maxVisitedNodesByDirection = {
+                        visited: visitedNodes,
+                        direction: "down",
+                      };
+                    }
+                  } else if (
+                    prevSnake[0].posY - 1 >= 0 &&
+                    grid[prevSnake[0].posX][prevSnake[0].posY - 1] !==
+                      "snake" &&
+                    direction !== "right"
+                  ) {
+                    const { visited: visitedNodes } = bfs(
+                      { posX: prevSnake[0].posX, posY: prevSnake[0].posY - 1 },
+                      grid,
+                      gridSize,
+                      food
+                    );
+
+                    if (
+                      visitedNodes.length >
+                      maxVisitedNodesByDirection.visited.length
+                    ) {
+                      maxVisitedNodesByDirection = {
+                        visited: visitedNodes,
+                        direction: "left",
+                      };
+                    }
+                  } else if (
+                    prevSnake[0].posY + 1 < gridSize &&
+                    grid[prevSnake[0].posX][prevSnake[0].posY - 1] !==
+                      "snake" &&
+                    direction !== "left"
+                  ) {
+                    const { visited: visitedNodes } = bfs(
+                      { posX: prevSnake[0].posX + 1, posY: prevSnake[0].posY },
+                      grid,
+                      gridSize,
+                      food
+                    );
+
+                    if (
+                      visitedNodes.length >
+                      maxVisitedNodesByDirection.visited.length
+                    ) {
+                      maxVisitedNodesByDirection = {
+                        visited: visitedNodes,
+                        direction: "right",
+                      };
+                    }
+                  }
+
+                  setDirection(maxVisitedNodesByDirection.direction);
+                }
+
+                setPath(path);
+                setVisited(visited);
+              } else {
+                // If the algorithm is hamiltonian cycle
+                setSnake((prevSnake) => {
+                  // Edge case: Check if the hamiltonian cycle is computed or not
+                  if (order.length > 0) {
+                    // If the algorithm is hamiltonian cycle
+                    if (algorithm === "Hamiltonian Cycle") {
+                      const newSnake = [...prevSnake];
+
+                      const head = newSnake[0]; // Get head position of the snake
+
+                      // Find the next number in the order the snake needs to move to
+                      const nextOrder =
+                        (order[head.posX][head.posY] + 1) %
+                        (gridSize * gridSize);
+
+                      // Find what direction to move next by checking all the adjacent neighbours
+                      if (
+                        // Check for up direction, also check for out-of-bounds conditon
+                        head.posX - 1 >= 0 &&
+                        order[head.posX - 1][head.posY] === nextOrder
+                      ) {
+                        setDirection("up");
+                      } else if (
+                        // Check for down direction
+                        head.posX + 1 < gridSize &&
+                        order[head.posX + 1][head.posY] === nextOrder
+                      ) {
+                        setDirection("down");
+                      } else if (
+                        // Check for left direction
+                        head.posY - 1 >= 0 &&
+                        order[head.posX][head.posY - 1] === nextOrder
+                      ) {
+                        setDirection("left");
+                      } else {
+                        // Check for right direction
+                        setDirection("right");
+                      }
+
+                      return newSnake;
+                    }
+                  }
+
+                  return prevSnake;
+                });
+              }
+
+              return prevFood;
+            });
+          }
+
+          moveSnake(); // Move snake to the next block
+
+          return prevSnake;
+        });
+      }, Math.abs(100 - speed));
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [isGameRunning, direction]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const keyPressed = event.key.toLowerCase();
+
+      switch (keyPressed) {
+        case "w":
+          if (direction !== "up" && direction !== "down") setDirection("up");
+          break;
+        case "s":
+          if (direction !== "down" && direction !== "up") setDirection("down");
+          break;
+        case "a":
+          if (direction !== "left" && direction !== "right")
+            setDirection("left");
+          break;
+        case "d":
+          if (direction !== "right" && direction !== "left")
+            setDirection("right");
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => removeEventListener("keydown", handleKeyDown);
+  });
+
+  const resetGame = () => {
+    setGrid((prevGrid) => {
+      const newGrid = [...prevGrid];
+
+      snake.forEach(({ posX, posY }) => {
+        newGrid[posX][posY] = "unvisited";
+      });
+
+      return newGrid;
+    });
+
+    setSnake([
+      { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) - 1 },
+      { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) },
+      { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) + 1 },
+    ]);
+
+    setScore(0);
+    setAutoPilotUsed(false);
+    setIsSnakeAlive(true);
+    setDirection("left");
+  };
+
+  return (
+    <>
+      <HeaderComponent
+        score={score}
+        bestScore={bestScore}
+        bestAutoPilotScore={bestAutoPilotScore}
+        isGameRunning={isGameRunning}
+        isSnakeAlive={isSnakeAlive}
+      />
+
+      <div className="pt-16 lg:pb-0">
+        <div className="m-4 block lg:hidden">
+          <select
+            value={algorithm}
+            className="w-full outline-none text-3xl font-bold -mx-1"
+            onChange={(e) => setAlgorithm(e.target.value)}
+          >
+            <option>Breadth First Search</option>
+            <option>Best First Search</option>
+            <option>A* Search</option>
+            <option>Hamiltonian Cycle</option>
+          </select>
+        </div>
+      </div>
+
+      <main className="flex flex-col space-y-4 p-4 lg:flex-row lg:space-y-0">
+        <GridComponent
+          grid={grid}
+          setGrid={setGrid}
+          gridSize={gridSize}
+          showGrid={showGrid}
+          snake={snake}
+          tail={tail}
+          food={food}
+          path={path}
+          visited={visited}
+          order={order}
+          showComputation={showComputation}
+          algorithm={algorithm}
+        />
+
+        <div className="flex flex-col space-y-4 lg:w-1/2 pb-36 lg:pb-0 lg:px-24">
+          <select
+            value={algorithm}
+            className="w-full outline-none text-3xl font-bold -mx-1"
+            onChange={(e) => setAlgorithm(e.target.value)}
+          >
+            <option>Breadth First Search</option>
+            <option>Best First Search</option>
+            <option>A* Search</option>
+            <option>Hamiltonian Cycle</option>
+          </select>
+
+          <div>{description}</div>
+
+          <div>
+            <div className="flex flex-col">
+              <label>
+                Grid Size ({`${gridSize}x${gridSize}`}){" "}
+                {gridSize > 25 && `May lag on few systems`}
+              </label>
+              <input
+                type="range"
+                min={10}
+                max={50}
+                step={10}
+                value={gridSize}
+                onChange={(e: any) =>
+                  !isGameRunning && setGridSize(e.target.value)
+                }
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label>Difficulty: {difficulty}</label>
+
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={25}
+                value={speed}
+                onChange={(e: any) => updateDifficulty(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-row space-x-2">
+            <button
+              onClick={() => setShowGrid((prevState) => !prevState)}
+              className="w-full bg-blue-500 p-4 text-white rounded-lg"
+            >
+              {showGrid ? "Hide Grid" : "Show Grid"}
+            </button>
+
+            <button
+              onClick={() => setShowComputation((prevState) => !prevState)}
+              className="w-full bg-blue-500 p-4 text-white rounded-lg"
+            >
+              {showComputation ? "Hide Computation" : "Show Computation"}
+            </button>
+          </div>
+
+          <div className="fixed lg:relative bottom-0 left-0 w-full bg-black bg-opacity-90 lg:bg-white">
+            <div className="flex flex-row space-x-2 p-2 lg:p-0">
+              <button
+                className={`p-4 text-white rounded-lg ${
+                  isSnakeAlive
+                    ? isGameRunning
+                      ? "bg-yellow-500"
+                      : "bg-green-500"
+                    : "bg-red-500"
+                } flex flex-row items-center space-x-2 justify-center transition-all ${
+                  isGameRunning ? "w-[12%]" : "w-[88%]"
+                }`}
+                onClick={() =>
+                  isSnakeAlive
+                    ? setIsGameRunning((prevState) => !prevState)
+                    : resetGame()
+                }
+              >
+                {isSnakeAlive ? (
+                  isGameRunning ? (
+                    <FaPause />
+                  ) : (
+                    <FaPlay />
+                  )
+                ) : (
+                  <FaRedo />
+                )}
+
+                {isSnakeAlive ? (
+                  isGameRunning ? (
+                    <></>
+                  ) : (
+                    <p>Play</p>
+                  )
+                ) : (
+                  <p>Retry</p>
+                )}
+              </button>
+
+              <button
+                className={`p-4 text-white rounded-lg ${
+                  autoPilot ? "bg-red-500" : "bg-green-500"
+                } flex flex-row items-center space-x-2 justify-center transition-all ${
+                  isGameRunning ? "w-[88%]" : "w-[12%]"
+                }`}
+                onClick={() => setautoPilot((prevState) => !prevState)}
+              >
+                <MdAutoAwesome />
+
+                {isGameRunning ? (
+                  autoPilot ? (
+                    <p>Disable AutoPilot</p>
+                  ) : (
+                    <p>Enable AutoPilot</p>
+                  )
+                ) : (
+                  <></>
+                )}
+              </button>
+            </div>
+            <div className="flex flex-row justify-between lg:hidden">
+              <button
+                onClick={() => setDirection("up")}
+                className="p-4 text-4xl text-white"
+              >
+                <FaArrowUp />
+              </button>
+              <button
+                onClick={() => setDirection("down")}
+                className="p-4 text-4xl text-white"
+              >
+                <FaArrowDown />
+              </button>
+              <button
+                onClick={() => setDirection("left")}
+                className="p-4 text-4xl text-white"
+              >
+                <FaArrowLeft />
+              </button>
+              <button
+                onClick={() => setDirection("right")}
+                className="p-4 text-4xl text-white"
+              >
+                <FaArrowRight />
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}
+
+export default App;
