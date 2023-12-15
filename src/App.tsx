@@ -297,6 +297,7 @@ function App() {
       const intervalId = setInterval(() => {
         // Get current snake state for every update
         setSnake((prevSnake) => {
+          const newSnake = [...prevSnake];
           // Check if autoPilot is enabled
           if (autoPilot) {
             setAutoPilotUsed(true); // Set that user has used autopilot, update autopilot score only
@@ -313,13 +314,13 @@ function App() {
                 let path: SnakeBlock[] = [],
                   visited: SnakeBlock[] = [];
                 if (algorithm === "Breadth First Search") {
-                  const res = bfs(prevSnake[0], grid, gridSize, prevFood);
+                  const res = bfs(newSnake[0], grid, gridSize, prevFood);
 
                   path = res.path;
                   visited = res.visited;
                 } else if (algorithm === "Best First Search") {
                   const res = bestFirstSearch(
-                    prevSnake[0],
+                    newSnake[0],
                     grid,
                     gridSize,
                     prevFood
@@ -328,14 +329,14 @@ function App() {
                   path = res.path;
                   visited = res.visited;
                 } else {
-                  const res = aStar(prevSnake[0], grid, gridSize, prevFood);
+                  const res = aStar(newSnake[0], grid, gridSize, prevFood);
 
                   path = res.path;
                   visited = res.visited;
                 }
 
                 if (path.length > 0) {
-                  const direction = getDirection(prevSnake[0], path[0]);
+                  const direction = getDirection(newSnake[0], path[0]);
                   setDirection(direction);
                 } else {
                   let maxVisitedNodesByDirection: {
@@ -347,13 +348,12 @@ function App() {
                   };
 
                   if (
-                    prevSnake[0].posX - 1 >= 0 &&
-                    grid[prevSnake[0].posX - 1][prevSnake[0].posY] !==
-                      "snake" &&
+                    newSnake[0].posX - 1 >= 0 &&
+                    grid[newSnake[0].posX - 1][newSnake[0].posY] !== "snake" &&
                     direction !== "down"
                   ) {
                     const { visited: visitedNodes } = bfs(
-                      { posX: prevSnake[0].posX - 1, posY: prevSnake[0].posY },
+                      { posX: newSnake[0].posX - 1, posY: newSnake[0].posY },
                       grid,
                       gridSize,
                       food
@@ -369,13 +369,12 @@ function App() {
                       };
                     }
                   } else if (
-                    prevSnake[0].posX + 1 < gridSize &&
-                    grid[prevSnake[0].posX + 1][prevSnake[0].posY] !==
-                      "snake" &&
+                    newSnake[0].posX + 1 < gridSize &&
+                    grid[newSnake[0].posX + 1][newSnake[0].posY] !== "snake" &&
                     direction !== "up"
                   ) {
                     const { visited: visitedNodes } = bfs(
-                      { posX: prevSnake[0].posX + 1, posY: prevSnake[0].posY },
+                      { posX: newSnake[0].posX + 1, posY: newSnake[0].posY },
                       grid,
                       gridSize,
                       food
@@ -391,13 +390,12 @@ function App() {
                       };
                     }
                   } else if (
-                    prevSnake[0].posY - 1 >= 0 &&
-                    grid[prevSnake[0].posX][prevSnake[0].posY - 1] !==
-                      "snake" &&
+                    newSnake[0].posY - 1 >= 0 &&
+                    grid[newSnake[0].posX][newSnake[0].posY - 1] !== "snake" &&
                     direction !== "right"
                   ) {
                     const { visited: visitedNodes } = bfs(
-                      { posX: prevSnake[0].posX, posY: prevSnake[0].posY - 1 },
+                      { posX: newSnake[0].posX, posY: newSnake[0].posY - 1 },
                       grid,
                       gridSize,
                       food
@@ -413,13 +411,12 @@ function App() {
                       };
                     }
                   } else if (
-                    prevSnake[0].posY + 1 < gridSize &&
-                    grid[prevSnake[0].posX][prevSnake[0].posY - 1] !==
-                      "snake" &&
+                    newSnake[0].posY + 1 < gridSize &&
+                    grid[newSnake[0].posX][newSnake[0].posY - 1] !== "snake" &&
                     direction !== "left"
                   ) {
                     const { visited: visitedNodes } = bfs(
-                      { posX: prevSnake[0].posX + 1, posY: prevSnake[0].posY },
+                      { posX: newSnake[0].posX + 1, posY: newSnake[0].posY },
                       grid,
                       gridSize,
                       food
@@ -495,7 +492,7 @@ function App() {
 
           moveSnake(); // Move snake to the next block
 
-          return prevSnake;
+          return newSnake;
         });
       }, Math.abs(100 - speed));
 
@@ -722,26 +719,42 @@ function App() {
             </div>
             <div className="flex flex-row justify-between lg:hidden">
               <button
-                onClick={() => setDirection("left")}
+                onClick={() =>
+                  direction !== "left" &&
+                  direction !== "right" &&
+                  setDirection("left")
+                }
                 className="p-4 text-white"
               >
                 <FaArrowLeft className="h-8 w-8" />
               </button>
               <button
-                onClick={() => setDirection("up")}
+                onClick={() =>
+                  direction !== "up" &&
+                  direction !== "down" &&
+                  setDirection("up")
+                }
                 className="p-4 text-4xl text-white"
               >
                 <FaArrowUp className="h-8 w-8" />
               </button>
               <button
-                onClick={() => setDirection("down")}
+                onClick={() =>
+                  direction !== "down" &&
+                  direction !== "up" &&
+                  setDirection("down")
+                }
                 className="p-4 text-4xl text-white"
               >
                 <FaArrowDown className="h-8 w-8" />
               </button>
 
               <button
-                onClick={() => setDirection("right")}
+                onClick={() =>
+                  direction !== "right" &&
+                  direction !== "left" &&
+                  setDirection("right")
+                }
                 className="p-4 text-4xl text-white"
               >
                 <FaArrowRight className="h-8 w-8" />
