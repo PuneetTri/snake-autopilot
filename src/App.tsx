@@ -601,7 +601,7 @@ function App() {
         <div className="flex flex-col space-y-4 lg:w-1/2 pb-36 lg:pb-0 lg:px-24">
           <select
             value={algorithm}
-            className="w-full outline-none text-3xl font-bold -mx-1"
+            className="w-full outline-none text-3xl font-bold -mx-1 hidden lg:block"
             onChange={(e) => setAlgorithm(e.target.value)}
           >
             <option>Breadth First Search</option>
@@ -680,12 +680,12 @@ function App() {
               >
                 {isSnakeAlive ? (
                   isGameRunning ? (
-                    <FaPause />
+                    <FaPause className="h-4 w-4" />
                   ) : (
-                    <FaPlay />
+                    <FaPlay className="h-4 w-4" />
                   )
                 ) : (
-                  <FaRedo />
+                  <FaRedo className="h-4 w-4" />
                 )}
 
                 {isSnakeAlive ? (
@@ -707,7 +707,7 @@ function App() {
                 }`}
                 onClick={() => setautoPilot((prevState) => !prevState)}
               >
-                <MdAutoAwesome />
+                <MdAutoAwesome className="h-4 w-4" />
 
                 {isGameRunning ? (
                   autoPilot ? (
@@ -722,28 +722,29 @@ function App() {
             </div>
             <div className="flex flex-row justify-between lg:hidden">
               <button
+                onClick={() => setDirection("left")}
+                className="p-4 text-white"
+              >
+                <FaArrowLeft className="h-8 w-8" />
+              </button>
+              <button
                 onClick={() => setDirection("up")}
                 className="p-4 text-4xl text-white"
               >
-                <FaArrowUp />
+                <FaArrowUp className="h-8 w-8" />
               </button>
               <button
                 onClick={() => setDirection("down")}
                 className="p-4 text-4xl text-white"
               >
-                <FaArrowDown />
+                <FaArrowDown className="h-8 w-8" />
               </button>
-              <button
-                onClick={() => setDirection("left")}
-                className="p-4 text-4xl text-white"
-              >
-                <FaArrowLeft />
-              </button>
+
               <button
                 onClick={() => setDirection("right")}
                 className="p-4 text-4xl text-white"
               >
-                <FaArrowRight />
+                <FaArrowRight className="h-8 w-8" />
               </button>
             </div>
           </div>

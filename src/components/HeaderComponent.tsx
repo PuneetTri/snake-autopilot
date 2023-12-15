@@ -31,11 +31,11 @@ const HeaderComponent = ({
       </header>
 
       <header
-        className={`p-4 bg-green-500 space-y-4 w-screen fixed z-10 h-16 transition-all ${
+        className={`p-4 bg-green-500 w-screen fixed z-10 h-16 transition-all ${
           isGameRunning || !isSnakeAlive ? "mt-0" : "-mt-16"
         }`}
       >
-        <div className="flex flex-row justify-center space-x-8">
+        <div className="flex flex-row justify-center items-center space-x-8 h-full">
           <h1 className="text-sm md:text-lg lg:text-xl font-bold">
             Score: {score}
           </h1>
