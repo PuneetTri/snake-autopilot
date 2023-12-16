@@ -578,7 +578,7 @@ function App() {
           algorithm={algorithm}
         />
 
-        <div className="flex flex-col space-y-4 lg:w-1/2 pb-36 lg:pb-0 lg:px-24">
+        <div className="flex flex-col space-y-4 lg:w-1/2 pb-52 lg:pb-0 lg:px-24">
           <select
             value={algorithm}
             className="w-full outline-none text-3xl font-bold -mx-1 hidden lg:block"
