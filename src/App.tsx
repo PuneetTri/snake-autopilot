@@ -286,7 +286,7 @@ function App() {
         break;
       case "Hamiltonian Cycle":
         setDescription(
-          "Later, I stumbled upon the Hamiltonian Cycle which with just one-time O(4^n) computation can actually result in a perfect game. However, it is painfully slow in visualizing the entire game as it follows the same path again and again often times without even the need. Once the cycle is calculated, it lazily follows the Hamiltonian cycle, which in turn ensures that the snake would never bite itself in its tail. Despite of the visualization issue, Hmiltonian cycle indeed results in a perfect game of snake. 🐍⚙️🏆🏁"
+          "Later, I stumbled upon the Hamiltonian Cycle which with just one-time O(4^n) computation can actually result in a perfect game. However, it is painfully slow in visualizing the entire game as it follows the same path again and again often times without even the need. Once the cycle is calculated, it lazily follows the Hamiltonian cycle, which in turn ensures that the snake would never bite itself in its tail. Despite of the visualization issue, Hamiltonian cycle indeed results in a perfect game of snake. 🐍⚙️🏆🏁"
         );
         break;
     }
@@ -700,48 +700,54 @@ function App() {
                 )}
               </button>
             </div>
-            <div className="flex flex-row justify-between lg:hidden">
-              <button
-                onClick={() =>
-                  direction !== "left" &&
-                  direction !== "right" &&
-                  setDirection("left")
-                }
-                className="p-4 text-white"
-              >
-                <FaArrowLeft className="h-8 w-8" />
-              </button>
-              <button
-                onClick={() =>
-                  direction !== "up" &&
-                  direction !== "down" &&
-                  setDirection("up")
-                }
-                className="p-4 text-4xl text-white"
-              >
-                <FaArrowUp className="h-8 w-8" />
-              </button>
-              <button
-                onClick={() =>
-                  direction !== "down" &&
-                  direction !== "up" &&
-                  setDirection("down")
-                }
-                className="p-4 text-4xl text-white"
-              >
-                <FaArrowDown className="h-8 w-8" />
-              </button>
+            <div className="flex flex-row justify-center space-x-32 lg:hidden items-center">
+              <div className="flex flex-col">
+                <button
+                  onClick={() =>
+                    direction !== "up" &&
+                    direction !== "down" &&
+                    setDirection("up")
+                  }
+                  className="p-4 text-4xl text-white"
+                >
+                  <FaArrowUp className="h-8 w-8" />
+                </button>
 
-              <button
-                onClick={() =>
-                  direction !== "right" &&
-                  direction !== "left" &&
-                  setDirection("right")
-                }
-                className="p-4 text-4xl text-white"
-              >
-                <FaArrowRight className="h-8 w-8" />
-              </button>
+                <button
+                  onClick={() =>
+                    direction !== "down" &&
+                    direction !== "up" &&
+                    setDirection("down")
+                  }
+                  className="p-4 text-4xl text-white"
+                >
+                  <FaArrowDown className="h-8 w-8" />
+                </button>
+              </div>
+
+              <div>
+                <button
+                  onClick={() =>
+                    direction !== "left" &&
+                    direction !== "right" &&
+                    setDirection("left")
+                  }
+                  className="p-4 text-white"
+                >
+                  <FaArrowLeft className="h-8 w-8" />
+                </button>
+
+                <button
+                  onClick={() =>
+                    direction !== "right" &&
+                    direction !== "left" &&
+                    setDirection("right")
+                  }
+                  className="p-4 text-4xl text-white"
+                >
+                  <FaArrowRight className="h-8 w-8" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
