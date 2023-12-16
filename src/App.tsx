@@ -271,22 +271,22 @@ function App() {
     switch (algorithm) {
       case "Breadth First Search":
         setDescription(
-          "At the start, used Breadth-First Search (BFS) for pathfinding in the snake game. It mapped out paths, but computation grew hefty on larger grids. Noticed performance issues due to exhaustive exploration. Identified the need for efficiency, leading to advancements in algorithms to cut down unnecessary computations and enhance speed. 🕹️🐍✨"
+          "For the first rendition, used Breadth-First Search (BFS) for pathfinding between the snake and food. It mapped out shortest paths but also its computation grew hefty pretty quickly, especially on larger grids. Noticed performance issues due to this exhaustive exploration approach. Realised that there is a need for efficiency, leading to search other pathfinding algorithms that cut down on the unnecessary computations to improve perfomance. 🕹️🐍✨"
         );
         break;
       case "Best First Search":
         setDescription(
-          "Initially, relied on Breadth-First Search (BFS) for snake pathfinding. While effective, computational demands escalated on larger grids, impacting performance. Recognizing the need for efficiency, transitioned to Best-First Search—a greedy algorithm, faster but not always optimal. Balancing efficiency and optimality became paramount for a refined autopilot strategy. 🕹️🔍🚀"
+          "Recognizing the need for efficiency, switched to Best-First Search—a greedy algorithm, fastest compared to both of the other shortest path finding approaches. But the issue was the shortest path was not always optimal, snake often took longer paths to the goal. So next was to find an algorithm that balances efficiency and optimality. 🕹️🔍🚀"
         );
         break;
       case "A* Search":
         setDescription(
-          "Transitioned to A* for snake pathfinding—an optimal blend of efficiency and perfection, ensuring the shortest path. Despite this triumph, an obsession blossomed for crafting the perfect snake game. Over time, this fixation deepened—an unrelenting pursuit to create an invincible snake, achieving the perfect score. The quest for an everlasting, flawless game experience consumed me entirely. 🐍✨🏆🌟"
+          "Transitioned to A* Search algprithm, the best solution out there to find the shortest path between two points. For this snake autopilot A* providied both efficiency and perfomance. For the most part it was doing a very well job to keep the snake alive for very long compared to a human. Despite this, it can't actually give a perfect game of snake. Over the time, working on this project I grew an obsession with always achieving a perfect score. So, I moved on to find something that can help me achieve exactly that. 🐍✨🏆🌟"
         );
         break;
       case "Hamiltonian Cycle":
         setDescription(
-          "Later, I stumbled upon the Hamiltonian Cycle which with just one-time O(4^n) computation can actually result in a perfect game. However, its efficiency is marred by slowness in visualization. Once calculated, it lazily traverses the grid, presenting an efficient path to the elusive perfect score. A game-changer, albeit with visual speed challenges, in the quest for snake perfection. 🐍⚙️🏆🏁"
+          "Later, I stumbled upon the Hamiltonian Cycle which with just one-time O(4^n) computation can actually result in a perfect game. However, it is painfully slow in visualizing the entire game as it follows the same path again and again often times without even the need. Once the cycle is calculated, it lazily follows the Hamiltonian cycle, which in turn ensures that the snake would never bite itself in its tail. Despite of the visualization issue, Hmiltonian cycle indeed results in a perfect game of snake. 🐍⚙️🏆🏁"
         );
         break;
     }
