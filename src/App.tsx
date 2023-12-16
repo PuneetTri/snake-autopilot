@@ -434,49 +434,43 @@ function App() {
               setVisited(visited);
             } else {
               // If the algorithm is hamiltonian cycle
-              setSnake((prevSnake) => {
-                // Edge case: Check if the hamiltonian cycle is computed or not
-                if (order.length > 0) {
-                  // If the algorithm is hamiltonian cycle
-                  if (algorithm === "Hamiltonian Cycle") {
-                    const newSnake = [...prevSnake];
+              // Edge case: Check if the hamiltonian cycle is computed or not
+              if (order.length > 0) {
+                // If the algorithm is hamiltonian cycle
+                if (algorithm === "Hamiltonian Cycle") {
+                  const newSnake = [...prevSnake];
 
-                    const head = newSnake[0]; // Get head position of the snake
+                  const head = newSnake[0]; // Get head position of the snake
 
-                    // Find the next number in the order the snake needs to move to
-                    const nextOrder =
-                      (order[head.posX][head.posY] + 1) % (gridSize * gridSize);
+                  // Find the next number in the order the snake needs to move to
+                  const nextOrder =
+                    (order[head.posX][head.posY] + 1) % (gridSize * gridSize);
 
-                    // Find what direction to move next by checking all the adjacent neighbours
-                    if (
-                      // Check for up direction, also check for out-of-bounds conditon
-                      head.posX - 1 >= 0 &&
-                      order[head.posX - 1][head.posY] === nextOrder
-                    ) {
-                      setDirection("up");
-                    } else if (
-                      // Check for down direction
-                      head.posX + 1 < gridSize &&
-                      order[head.posX + 1][head.posY] === nextOrder
-                    ) {
-                      setDirection("down");
-                    } else if (
-                      // Check for left direction
-                      head.posY - 1 >= 0 &&
-                      order[head.posX][head.posY - 1] === nextOrder
-                    ) {
-                      setDirection("left");
-                    } else {
-                      // Check for right direction
-                      setDirection("right");
-                    }
-
-                    return newSnake;
+                  // Find what direction to move next by checking all the adjacent neighbours
+                  if (
+                    // Check for up direction, also check for out-of-bounds conditon
+                    head.posX - 1 >= 0 &&
+                    order[head.posX - 1][head.posY] === nextOrder
+                  ) {
+                    setDirection("up");
+                  } else if (
+                    // Check for down direction
+                    head.posX + 1 < gridSize &&
+                    order[head.posX + 1][head.posY] === nextOrder
+                  ) {
+                    setDirection("down");
+                  } else if (
+                    // Check for left direction
+                    head.posY - 1 >= 0 &&
+                    order[head.posX][head.posY - 1] === nextOrder
+                  ) {
+                    setDirection("left");
+                  } else {
+                    // Check for right direction
+                    setDirection("right");
                   }
                 }
-
-                return prevSnake;
-              });
+              }
             }
           }
 
