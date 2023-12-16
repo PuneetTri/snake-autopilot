@@ -708,20 +708,20 @@ function App() {
                     direction !== "right" &&
                     setDirection("left")
                   }
-                  className=" text-white"
+                  className="py-4 pl-4 text-white"
                 >
                   <FaArrowLeft className="h-8 w-8" />
                 </button>
               </div>
 
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-10">
                 <button
                   onClick={() =>
                     direction !== "up" &&
                     direction !== "down" &&
                     setDirection("up")
                   }
-                  className="p-4 text-4xl text-white"
+                  className="px-4 pt-4 text-4xl text-white"
                 >
                   <FaArrowUp className="h-8 w-8" />
                 </button>
@@ -732,7 +732,7 @@ function App() {
                     direction !== "up" &&
                     setDirection("down")
                   }
-                  className="p-4 text-4xl text-white"
+                  className="px-4 pb-4 text-4xl text-white"
                 >
                   <FaArrowDown className="h-8 w-8" />
                 </button>
@@ -745,7 +745,7 @@ function App() {
                     direction !== "left" &&
                     setDirection("right")
                   }
-                  className="p- text-4xl text-white"
+                  className="py-4 pr-4 text-4xl text-white"
                 >
                   <FaArrowRight className="h-8 w-8" />
                 </button>
