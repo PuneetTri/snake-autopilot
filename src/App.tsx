@@ -54,7 +54,7 @@ function App() {
   const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
   const [isSnakeAlive, setIsSnakeAlive] = useState<boolean>(true);
   const [direction, setDirection] = useState<string>("left");
-  const [speed, setSpeed] = useState<number>(75);
+  const [speed, setSpeed] = useState<number>(25);
   const [difficulty, setDifficulty] = useState<string>("Easy");
   const [autoPilot, setautoPilot] = useState<boolean>(false);
   const [autoPilotUsed, setAutoPilotUsed] = useState<boolean>(false);
