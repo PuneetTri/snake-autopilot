@@ -137,8 +137,8 @@ function App() {
         newSnake[0].posX > gridSize - 1 ||
         newSnake[0].posY > gridSize - 1
       ) {
-        // console.log("Out of bounds");
-        // console.log(snake[0]);
+        console.log("Out of bounds");
+        console.log(snake[0]);
         setIsGameRunning(false); // Stop the game immediately
         setIsSnakeAlive(false); // Set snake as dead
         updateScores();
@@ -147,8 +147,8 @@ function App() {
 
       // Check if the snake has bitten itself
       if (grid[newSnake[0].posX][newSnake[0].posY] === "snake") {
-        // console.log("Snake bites itself");
-        // console.log(snake[0]);
+        console.log("Snake bites itself");
+        console.log(snake[0]);
         setIsGameRunning(false); // Stop the game immediately
         setIsSnakeAlive(false); // Set snake as dead
         updateScores();
@@ -303,195 +303,184 @@ function App() {
             setAutoPilotUsed(true); // Set that user has used autopilot, update autopilot score only
 
             // Using prevFood state to get the current prevFood position instantly
-            setFood((prevFood) => {
-              // If the code is BFS/A*
-              if (
-                algorithm === "Breadth First Search" ||
-                algorithm === "Best First Search" ||
-                algorithm === "A* Search"
-              ) {
-                // If algorithm is specifically BFS
-                let path: SnakeBlock[] = [],
-                  visited: SnakeBlock[] = [];
-                if (algorithm === "Breadth First Search") {
-                  const res = bfs(newSnake[0], grid, gridSize, prevFood);
+            // If the code is BFS/A*
+            if (
+              algorithm === "Breadth First Search" ||
+              algorithm === "Best First Search" ||
+              algorithm === "A* Search"
+            ) {
+              // If algorithm is specifically BFS
+              let path: SnakeBlock[] = [],
+                visited: SnakeBlock[] = [];
+              if (algorithm === "Breadth First Search") {
+                const res = bfs(newSnake[0], grid, gridSize, food);
 
-                  path = res.path;
-                  visited = res.visited;
-                } else if (algorithm === "Best First Search") {
-                  const res = bestFirstSearch(
-                    newSnake[0],
-                    grid,
-                    gridSize,
-                    prevFood
-                  );
+                path = res.path;
+                visited = res.visited;
+              } else if (algorithm === "Best First Search") {
+                const res = bestFirstSearch(newSnake[0], grid, gridSize, food);
 
-                  path = res.path;
-                  visited = res.visited;
-                } else {
-                  const res = aStar(newSnake[0], grid, gridSize, prevFood);
-
-                  path = res.path;
-                  visited = res.visited;
-                }
-
-                if (path.length > 0) {
-                  const direction = getDirection(newSnake[0], path[0]);
-                  setDirection(direction);
-                } else {
-                  let maxVisitedNodesByDirection: {
-                    visited: SnakeBlock[];
-                    direction: string;
-                  } = {
-                    visited: [],
-                    direction: "",
-                  };
-
-                  if (
-                    newSnake[0].posX - 1 >= 0 &&
-                    grid[newSnake[0].posX - 1][newSnake[0].posY] !== "snake" &&
-                    direction !== "down"
-                  ) {
-                    const { visited: visitedNodes } = bfs(
-                      { posX: newSnake[0].posX - 1, posY: newSnake[0].posY },
-                      grid,
-                      gridSize,
-                      food
-                    );
-
-                    if (
-                      visitedNodes.length >
-                      maxVisitedNodesByDirection.visited.length
-                    ) {
-                      maxVisitedNodesByDirection = {
-                        visited: visitedNodes,
-                        direction: "up",
-                      };
-                    }
-                  } else if (
-                    newSnake[0].posX + 1 < gridSize &&
-                    grid[newSnake[0].posX + 1][newSnake[0].posY] !== "snake" &&
-                    direction !== "up"
-                  ) {
-                    const { visited: visitedNodes } = bfs(
-                      { posX: newSnake[0].posX + 1, posY: newSnake[0].posY },
-                      grid,
-                      gridSize,
-                      food
-                    );
-
-                    if (
-                      visitedNodes.length >
-                      maxVisitedNodesByDirection.visited.length
-                    ) {
-                      maxVisitedNodesByDirection = {
-                        visited: visitedNodes,
-                        direction: "down",
-                      };
-                    }
-                  } else if (
-                    newSnake[0].posY - 1 >= 0 &&
-                    grid[newSnake[0].posX][newSnake[0].posY - 1] !== "snake" &&
-                    direction !== "right"
-                  ) {
-                    const { visited: visitedNodes } = bfs(
-                      { posX: newSnake[0].posX, posY: newSnake[0].posY - 1 },
-                      grid,
-                      gridSize,
-                      food
-                    );
-
-                    if (
-                      visitedNodes.length >
-                      maxVisitedNodesByDirection.visited.length
-                    ) {
-                      maxVisitedNodesByDirection = {
-                        visited: visitedNodes,
-                        direction: "left",
-                      };
-                    }
-                  } else if (
-                    newSnake[0].posY + 1 < gridSize &&
-                    grid[newSnake[0].posX][newSnake[0].posY - 1] !== "snake" &&
-                    direction !== "left"
-                  ) {
-                    const { visited: visitedNodes } = bfs(
-                      { posX: newSnake[0].posX + 1, posY: newSnake[0].posY },
-                      grid,
-                      gridSize,
-                      food
-                    );
-
-                    if (
-                      visitedNodes.length >
-                      maxVisitedNodesByDirection.visited.length
-                    ) {
-                      maxVisitedNodesByDirection = {
-                        visited: visitedNodes,
-                        direction: "right",
-                      };
-                    }
-                  }
-
-                  setDirection(maxVisitedNodesByDirection.direction);
-                }
-
-                setPath(path);
-                setVisited(visited);
+                path = res.path;
+                visited = res.visited;
               } else {
-                // If the algorithm is hamiltonian cycle
-                setSnake((prevSnake) => {
-                  // Edge case: Check if the hamiltonian cycle is computed or not
-                  if (order.length > 0) {
-                    // If the algorithm is hamiltonian cycle
-                    if (algorithm === "Hamiltonian Cycle") {
-                      const newSnake = [...prevSnake];
+                const res = aStar(newSnake[0], grid, gridSize, food);
 
-                      const head = newSnake[0]; // Get head position of the snake
-
-                      // Find the next number in the order the snake needs to move to
-                      const nextOrder =
-                        (order[head.posX][head.posY] + 1) %
-                        (gridSize * gridSize);
-
-                      // Find what direction to move next by checking all the adjacent neighbours
-                      if (
-                        // Check for up direction, also check for out-of-bounds conditon
-                        head.posX - 1 >= 0 &&
-                        order[head.posX - 1][head.posY] === nextOrder
-                      ) {
-                        setDirection("up");
-                      } else if (
-                        // Check for down direction
-                        head.posX + 1 < gridSize &&
-                        order[head.posX + 1][head.posY] === nextOrder
-                      ) {
-                        setDirection("down");
-                      } else if (
-                        // Check for left direction
-                        head.posY - 1 >= 0 &&
-                        order[head.posX][head.posY - 1] === nextOrder
-                      ) {
-                        setDirection("left");
-                      } else {
-                        // Check for right direction
-                        setDirection("right");
-                      }
-
-                      return newSnake;
-                    }
-                  }
-
-                  return prevSnake;
-                });
+                path = res.path;
+                visited = res.visited;
               }
 
-              return prevFood;
-            });
+              if (path.length > 0) {
+                const direction = getDirection(newSnake[0], path[0]);
+                setDirection(direction);
+              } else {
+                let maxVisitedNodesByDirection: {
+                  visited: SnakeBlock[];
+                  direction: string;
+                } = {
+                  visited: [],
+                  direction: "",
+                };
+
+                if (
+                  newSnake[0].posX - 1 >= 0 &&
+                  grid[newSnake[0].posX - 1][newSnake[0].posY] !== "snake" &&
+                  direction !== "down"
+                ) {
+                  const { visited: visitedNodes } = bfs(
+                    { posX: newSnake[0].posX - 1, posY: newSnake[0].posY },
+                    grid,
+                    gridSize,
+                    food
+                  );
+
+                  if (
+                    visitedNodes.length >
+                    maxVisitedNodesByDirection.visited.length
+                  ) {
+                    maxVisitedNodesByDirection = {
+                      visited: visitedNodes,
+                      direction: "up",
+                    };
+                  }
+                } else if (
+                  newSnake[0].posX + 1 < gridSize &&
+                  grid[newSnake[0].posX + 1][newSnake[0].posY] !== "snake" &&
+                  direction !== "up"
+                ) {
+                  const { visited: visitedNodes } = bfs(
+                    { posX: newSnake[0].posX + 1, posY: newSnake[0].posY },
+                    grid,
+                    gridSize,
+                    food
+                  );
+
+                  if (
+                    visitedNodes.length >
+                    maxVisitedNodesByDirection.visited.length
+                  ) {
+                    maxVisitedNodesByDirection = {
+                      visited: visitedNodes,
+                      direction: "down",
+                    };
+                  }
+                } else if (
+                  newSnake[0].posY - 1 >= 0 &&
+                  grid[newSnake[0].posX][newSnake[0].posY - 1] !== "snake" &&
+                  direction !== "right"
+                ) {
+                  const { visited: visitedNodes } = bfs(
+                    { posX: newSnake[0].posX, posY: newSnake[0].posY - 1 },
+                    grid,
+                    gridSize,
+                    food
+                  );
+
+                  if (
+                    visitedNodes.length >
+                    maxVisitedNodesByDirection.visited.length
+                  ) {
+                    maxVisitedNodesByDirection = {
+                      visited: visitedNodes,
+                      direction: "left",
+                    };
+                  }
+                } else if (
+                  newSnake[0].posY + 1 < gridSize &&
+                  grid[newSnake[0].posX][newSnake[0].posY - 1] !== "snake" &&
+                  direction !== "left"
+                ) {
+                  const { visited: visitedNodes } = bfs(
+                    { posX: newSnake[0].posX + 1, posY: newSnake[0].posY },
+                    grid,
+                    gridSize,
+                    food
+                  );
+
+                  if (
+                    visitedNodes.length >
+                    maxVisitedNodesByDirection.visited.length
+                  ) {
+                    maxVisitedNodesByDirection = {
+                      visited: visitedNodes,
+                      direction: "right",
+                    };
+                  }
+                }
+
+                setDirection(maxVisitedNodesByDirection.direction);
+              }
+
+              setPath(path);
+              setVisited(visited);
+            } else {
+              // If the algorithm is hamiltonian cycle
+              setSnake((prevSnake) => {
+                // Edge case: Check if the hamiltonian cycle is computed or not
+                if (order.length > 0) {
+                  // If the algorithm is hamiltonian cycle
+                  if (algorithm === "Hamiltonian Cycle") {
+                    const newSnake = [...prevSnake];
+
+                    const head = newSnake[0]; // Get head position of the snake
+
+                    // Find the next number in the order the snake needs to move to
+                    const nextOrder =
+                      (order[head.posX][head.posY] + 1) % (gridSize * gridSize);
+
+                    // Find what direction to move next by checking all the adjacent neighbours
+                    if (
+                      // Check for up direction, also check for out-of-bounds conditon
+                      head.posX - 1 >= 0 &&
+                      order[head.posX - 1][head.posY] === nextOrder
+                    ) {
+                      setDirection("up");
+                    } else if (
+                      // Check for down direction
+                      head.posX + 1 < gridSize &&
+                      order[head.posX + 1][head.posY] === nextOrder
+                    ) {
+                      setDirection("down");
+                    } else if (
+                      // Check for left direction
+                      head.posY - 1 >= 0 &&
+                      order[head.posX][head.posY - 1] === nextOrder
+                    ) {
+                      setDirection("left");
+                    } else {
+                      // Check for right direction
+                      setDirection("right");
+                    }
+
+                    return newSnake;
+                  }
+                }
+
+                return prevSnake;
+              });
+            }
           }
 
           moveSnake(); // Move snake to the next block
-
           return newSnake;
         });
       }, Math.abs(100 - speed));
@@ -500,7 +489,7 @@ function App() {
         clearInterval(intervalId);
       };
     }
-  }, [isGameRunning, direction]);
+  }, [isGameRunning, direction, snake]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
