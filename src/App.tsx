@@ -54,8 +54,8 @@ function App() {
   const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
   const [isSnakeAlive, setIsSnakeAlive] = useState<boolean>(true);
   const [direction, setDirection] = useState<string>("left");
-  const [speed, setSpeed] = useState<number>(50);
-  const [difficulty, setDifficulty] = useState<string>("Medium");
+  const [speed, setSpeed] = useState<number>(75);
+  const [difficulty, setDifficulty] = useState<string>("Easy");
   const [autoPilot, setautoPilot] = useState<boolean>(false);
   const [autoPilotUsed, setAutoPilotUsed] = useState<boolean>(false);
   const [algorithm, setAlgorithm] = useState<string>("Breadth First Search");
@@ -700,8 +700,21 @@ function App() {
                 )}
               </button>
             </div>
-            <div className="flex flex-row justify-center space-x-32 lg:hidden items-center">
-              <div className="flex flex-col">
+            <div className="flex flex-row justify-center lg:hidden items-center">
+              <div>
+                <button
+                  onClick={() =>
+                    direction !== "left" &&
+                    direction !== "right" &&
+                    setDirection("left")
+                  }
+                  className=" text-white"
+                >
+                  <FaArrowLeft className="h-8 w-8" />
+                </button>
+              </div>
+
+              <div className="flex flex-col space-y-4">
                 <button
                   onClick={() =>
                     direction !== "up" &&
@@ -728,22 +741,11 @@ function App() {
               <div>
                 <button
                   onClick={() =>
-                    direction !== "left" &&
-                    direction !== "right" &&
-                    setDirection("left")
-                  }
-                  className="p-4 text-white"
-                >
-                  <FaArrowLeft className="h-8 w-8" />
-                </button>
-
-                <button
-                  onClick={() =>
                     direction !== "right" &&
                     direction !== "left" &&
                     setDirection("right")
                   }
-                  className="p-4 text-4xl text-white"
+                  className="p- text-4xl text-white"
                 >
                   <FaArrowRight className="h-8 w-8" />
                 </button>
