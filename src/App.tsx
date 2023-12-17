@@ -868,15 +868,16 @@ function App() {
             GitHub. Click the GitHub icon to explore the code.
           </p>
           <p className="text-xs">
-            About this project, this project initially started as an attempt to
-            recreate the nostalgic snake game using ReactJS. However, it quickly
-            transformed into a challenging project focused on helping meto win
-            the game atleast once 🥲. Struggling to play the game led me to
-            design of feature which with the help of pathfinding algorithms can
-            give a me quickboost into the game, feature aptly named "Autopilot."
-            The project serves as a demonstration of how these algorithms can
-            solve seemingly trivial challenges, such as playing a snake game,
-            and showcases their potential applications in the gaming industry,
+            This project initially started as an attempt to recreate the
+            nostalgic snake game using ReactJS. However, it quickly transformed
+            into a challenging project focused on helping me to win the game
+            atleast for once 🥲. Struggling to play the game led me to design of
+            feature, which with the help of pathfinding algorithms gave me a
+            quickboost into the game, I call this feature "Autopilot." The
+            project is not only just a snake game, it also serves as a
+            demonstration of how path-finding algorithms can be used to solve
+            seemingly trivial challenges, such as playing a snake game, and
+            showcases their potential applications in the gaming industry,
             particularly in facilitating NPC navigation.
           </p>
           <button
