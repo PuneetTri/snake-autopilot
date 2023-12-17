@@ -35,6 +35,12 @@ function App() {
       ? Number(window.localStorage.getItem("bestAutoPilotScore"))
       : 0
   );
+  const [deathCount, setDeathCount] = useState<number>(0);
+  const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [showNavPopup, setShowNavPopup] = useState<boolean>(false);
+  const [isFirstTimeVisitor, setIsFirstTimeVisitor] = useState<boolean>(
+    window.localStorage.getItem("visit") ? false : true
+  );
 
   // Snake and item states
   const [snake, setSnake] = useState<SnakeBlock[]>([
@@ -96,6 +102,27 @@ function App() {
       }
     }
   };
+
+  // If the death count goes > 3 then show popup
+  useEffect(() => {
+    if (deathCount >= 3 && !autoPilot) {
+      setShowPopup(true);
+      setDeathCount(0);
+    }
+  }, [deathCount]);
+
+  // Show nav popup whenver the game starts
+  useEffect(() => {
+    if (isGameRunning) {
+      setShowNavPopup(true);
+
+      const timeoutId = setTimeout(() => {
+        setShowNavPopup(false);
+      }, 3000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isGameRunning]);
 
   const moveSnake = () => {
     const movement: SnakeMovement = { x: 0, y: 0 };
@@ -522,6 +549,15 @@ function App() {
   });
 
   const resetGame = () => {
+    // Increase death counts to prompt autopilot option
+    setDeathCount((prevCount) => {
+      if (!autoPilotUsed) {
+        return prevCount + 1;
+      }
+
+      return prevCount;
+    });
+
     setGrid((prevGrid) => {
       const newGrid = [...prevGrid];
 
@@ -659,11 +695,15 @@ function App() {
                 } flex flex-row items-center space-x-2 justify-center transition-all ${
                   isGameRunning ? "w-1/5" : "w-4/5"
                 }`}
-                onClick={() =>
-                  isSnakeAlive
-                    ? setIsGameRunning((prevState) => !prevState)
-                    : resetGame()
-                }
+                onClick={() => {
+                  if (isSnakeAlive) {
+                    setIsGameRunning((prevState) => {
+                      return !prevState;
+                    });
+                  } else {
+                    resetGame();
+                  }
+                }}
               >
                 {isSnakeAlive ? (
                   isGameRunning ? (
@@ -765,6 +805,82 @@ function App() {
           </div>
         </div>
       </main>
+
+      <div
+        onClick={() => setShowPopup(false)}
+        className={`fixed top-0 left-0 h-screen w-screen bg-black bg-opacity-50 flex items-center justify-center transition-all duration-300 ${
+          showPopup ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="bg-white w-4/5 lg:w-1/2 p-4 shadow-xl text-center space-y-4 rounded-lg"
+        >
+          <h1 className="text-3xl font-bold">Struggling?</h1>
+          <p className="text-sm">
+            No worries! Give yourself a quick boost into the game with the
+            Autopilot feature. And while you're at it, explore different
+            autopilot algorithms from the drop-down menu. Also, scroll down to
+            check out and follow along my journey of making this project 🚀✨
+          </p>
+          <button
+            className={`p-4 text-white rounded-lg ${
+              autoPilot ? "bg-red-500" : "bg-green-500"
+            } flex flex-row items-center space-x-2 justify-center transition-all w-full
+            }`}
+            onClick={() => setautoPilot((prevState) => !prevState)}
+          >
+            <MdAutoAwesome className="text-xl" />
+
+            {autoPilot ? <p>Disable AutoPilot</p> : <p>Enable AutoPilot</p>}
+          </button>
+        </div>
+      </div>
+
+      <div
+        className={`fixed top-0 left-0 h-screen w-screen bg-black bg-opacity-50 flex items-center justify-center transition-all duration-300 ${
+          isFirstTimeVisitor ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="bg-white w-4/5 lg:w-1/2 p-4 shadow-xl text-center space-y-4 rounded-lg">
+          <h1 className="text-3xl font-bold">Hello there!</h1>
+          <p className="text-xs text-gray-500">
+            First of all, thank you for checking out this project 😄. The entire
+            source code for this project is open source and available on my
+            GitHub. Click the GitHub icon to explore the code.
+          </p>
+          <p className="text-xs">
+            About this project, this project initially started as an attempt to
+            recreate the nostalgic snake game using ReactJS. However, it quickly
+            transformed into a challenging project focused on helping meto win
+            the game atleast once 🥲. Struggling to play the game led me to
+            design of feature which with the help of pathfinding algorithms can
+            give a me quickboost into the game, feature aptly named "Autopilot."
+            The project serves as a demonstration of how these algorithms can
+            solve seemingly trivial challenges, such as playing a snake game,
+            and showcases their potential applications in the gaming industry,
+            particularly in facilitating NPC navigation.
+          </p>
+          <button
+            className={`p-4 text-white rounded-lg bg-blue-500 flex flex-row items-center space-x-2 justify-center transition-all w-full`}
+            onClick={() => {
+              window.localStorage.setItem("visit", "true"); // Ensure the popup is not shown to user everytime
+              setIsFirstTimeVisitor((prevState) => !prevState);
+            }}
+          >
+            Okay, got it
+          </button>
+        </div>
+      </div>
+
+      <div
+        onClick={() => setShowNavPopup(true)}
+        className={`fixed hidden lg:block left-1/2 transform -translate-x-1/2 bg-white p-4 shadow shadow-gray-500 rounded-lg font-bold transition-all ${
+          showNavPopup ? "bottom-2" : "-bottom-16"
+        }`}
+      >
+        <p>🕹️ Use WASD to navigate the snake</p>
+      </div>
     </>
   );
 }
