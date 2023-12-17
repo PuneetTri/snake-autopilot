@@ -111,19 +111,6 @@ function App() {
     }
   }, [deathCount]);
 
-  // Show nav popup whenver the game starts
-  useEffect(() => {
-    if (isGameRunning) {
-      setShowNavPopup(true);
-
-      const timeoutId = setTimeout(() => {
-        setShowNavPopup(false);
-      }, 3000);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [isGameRunning]);
-
   const moveSnake = () => {
     const movement: SnakeMovement = { x: 0, y: 0 };
 
@@ -568,6 +555,32 @@ function App() {
       return newGrid;
     });
 
+    // Respawn food on random location
+    setFood((prevPos) => {
+      setGrid((prevGrid) => {
+        const newGrid = [...prevGrid];
+
+        newGrid[prevPos.posX][prevPos.posY] = "unvisited";
+
+        return newGrid;
+      });
+
+      let newPos = {
+        posX: Math.floor(Math.random() * (gridSize - 1)),
+        posY: Math.floor(Math.random() * (gridSize - 1)),
+      };
+
+      // Check if this pos is a unvisited node
+      while (grid[newPos.posX][newPos.posY] !== "unvisited") {
+        newPos = {
+          posX: Math.floor(Math.random() * (gridSize - 1)),
+          posY: Math.floor(Math.random() * (gridSize - 1)),
+        };
+      }
+
+      return newPos;
+    });
+
     setSnake([
       { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) - 1 },
       { posX: Math.floor(gridSize / 2), posY: Math.floor(gridSize / 2) },
@@ -698,6 +711,11 @@ function App() {
                 onClick={() => {
                   if (isSnakeAlive) {
                     setIsGameRunning((prevState) => {
+                      setShowNavPopup(true);
+
+                      setTimeout(() => {
+                        setShowNavPopup(false);
+                      }, 3000);
                       return !prevState;
                     });
                   } else {
