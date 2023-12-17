@@ -722,7 +722,7 @@ function App() {
                 </button>
               </div>
 
-              <div className="flex flex-col space-y-10">
+              <div className="flex flex-col space-y-12">
                 <button
                   onClick={() => {
                     if (direction !== "up" && direction !== "down") {
