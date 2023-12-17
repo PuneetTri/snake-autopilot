@@ -21,7 +21,7 @@ function NodeComponent({
         <div
           className={`border-[1px] ${gridVisibility} bg-white flex items-center justify-center`}
         >
-          <p className="text-[0.4rem]">
+          <p className="lg:text-[0.4rem] text-[0.2rem]">
             {algorithm === "Hamiltonian Cycle" &&
               showComputation &&
               orderNumber}
