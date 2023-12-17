@@ -657,7 +657,7 @@ function App() {
                       : "bg-green-500"
                     : "bg-red-500"
                 } flex flex-row items-center space-x-2 justify-center transition-all ${
-                  isGameRunning ? "w-[12%]" : "w-[88%]"
+                  isGameRunning ? "w-1/5" : "w-4/5"
                 }`}
                 onClick={() =>
                   isSnakeAlive
@@ -690,7 +690,7 @@ function App() {
                 className={`p-4 text-white rounded-lg ${
                   autoPilot ? "bg-red-500" : "bg-green-500"
                 } flex flex-row items-center space-x-2 justify-center transition-all ${
-                  isGameRunning ? "w-[88%]" : "w-[12%]"
+                  isGameRunning ? "w-4/5" : "w-1/5"
                 }`}
                 onClick={() => setautoPilot((prevState) => !prevState)}
               >
