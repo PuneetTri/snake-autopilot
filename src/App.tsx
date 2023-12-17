@@ -61,6 +61,7 @@ function App() {
   const [algorithm, setAlgorithm] = useState<string>("Breadth First Search");
   const [description, setDescription] = useState<string>("");
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
+  const [disableKeyPress, setDisableKeyPress] = useState<boolean>(false); // To solve button mashing bug
 
   const updateDifficulty = (speed: number) => {
     if (speed == 0) {
@@ -295,6 +296,8 @@ function App() {
   useEffect(() => {
     if (isGameRunning) {
       const intervalId = setInterval(() => {
+        setDisableKeyPress(false); // Re-enable key once the grid is re-rendered therfore the next move
+
         // Get current snake state for every update
         setSnake((prevSnake) => {
           const newSnake = [...prevSnake];
@@ -491,22 +494,26 @@ function App() {
 
       switch (keyPressed) {
         case "w":
-          if (direction !== "up" && direction !== "down") setDirection("up");
+          if (direction !== "up" && direction !== "down" && !disableKeyPress)
+            setDirection("up");
           break;
         case "s":
-          if (direction !== "down" && direction !== "up") setDirection("down");
+          if (direction !== "down" && direction !== "up" && !disableKeyPress)
+            setDirection("down");
           break;
         case "a":
-          if (direction !== "left" && direction !== "right")
+          if (direction !== "left" && direction !== "right" && !disableKeyPress)
             setDirection("left");
           break;
         case "d":
-          if (direction !== "right" && direction !== "left")
+          if (direction !== "right" && direction !== "left" && !disableKeyPress)
             setDirection("right");
           break;
         default:
           break;
       }
+
+      setDisableKeyPress(true);
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -703,11 +710,12 @@ function App() {
             <div className="flex flex-row justify-center lg:hidden items-center">
               <div>
                 <button
-                  onClick={() =>
-                    direction !== "left" &&
-                    direction !== "right" &&
-                    setDirection("left")
-                  }
+                  onClick={() => {
+                    if (direction !== "left" && direction !== "right") {
+                      setDirection("left");
+                      setDisableKeyPress(true);
+                    }
+                  }}
                   className="py-4 pl-4 text-white"
                 >
                   <FaArrowLeft className="h-8 w-8" />
@@ -716,22 +724,24 @@ function App() {
 
               <div className="flex flex-col space-y-10">
                 <button
-                  onClick={() =>
-                    direction !== "up" &&
-                    direction !== "down" &&
-                    setDirection("up")
-                  }
+                  onClick={() => {
+                    if (direction !== "up" && direction !== "down") {
+                      setDirection("up");
+                      setDisableKeyPress(true);
+                    }
+                  }}
                   className="px-4 pt-4 text-4xl text-white"
                 >
                   <FaArrowUp className="h-8 w-8" />
                 </button>
 
                 <button
-                  onClick={() =>
-                    direction !== "down" &&
-                    direction !== "up" &&
-                    setDirection("down")
-                  }
+                  onClick={() => {
+                    if (direction !== "down" && direction !== "up") {
+                      setDirection("down");
+                      setDisableKeyPress(true);
+                    }
+                  }}
                   className="px-4 pb-4 text-4xl text-white"
                 >
                   <FaArrowDown className="h-8 w-8" />
@@ -740,11 +750,12 @@ function App() {
 
               <div>
                 <button
-                  onClick={() =>
-                    direction !== "right" &&
-                    direction !== "left" &&
-                    setDirection("right")
-                  }
+                  onClick={() => {
+                    if (direction !== "right" && direction !== "left") {
+                      setDirection("right");
+                      setDisableKeyPress(true);
+                    }
+                  }}
                   className="py-4 pr-4 text-4xl text-white"
                 >
                   <FaArrowRight className="h-8 w-8" />
