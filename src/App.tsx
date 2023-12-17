@@ -667,12 +667,12 @@ function App() {
               >
                 {isSnakeAlive ? (
                   isGameRunning ? (
-                    <FaPause className="h-4 w-4" />
+                    <FaPause className="text-xl" />
                   ) : (
-                    <FaPlay className="h-4 w-4" />
+                    <FaPlay className="text-xl" />
                   )
                 ) : (
-                  <FaRedo className="h-4 w-4" />
+                  <FaRedo className="text-xl" />
                 )}
 
                 {isSnakeAlive ? (
@@ -694,7 +694,7 @@ function App() {
                 }`}
                 onClick={() => setautoPilot((prevState) => !prevState)}
               >
-                <MdAutoAwesome className="h-4 w-4" />
+                <MdAutoAwesome className="text-xl" />
 
                 {isGameRunning ? (
                   autoPilot ? (
